@@ -13,7 +13,7 @@ export class AppComponent {
   #numberService = inject(NumberService);
   numberUx$ = this.#numberService.watchNumber$();
   numberSquaredUx$ = this.#numberService.watchSquared$();
-  numberHalvedSquareUx$ = this.#numberService.watchHalvedSquare$();
+  numberHalvedSquareUx$ = this.#numberService.watchHalvedSquareAsString$();
 
   numberConsole$ = this.#numberService
     .watchNumber$()
