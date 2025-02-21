@@ -3,6 +3,7 @@ import { Component, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, Observable, of, throwError } from 'rxjs';
 import { NumberService } from './number.service';
+import { WrappedNumberService } from './wrapped-number.service';
 
 @Component({
   selector: 'app-root',
@@ -11,13 +12,15 @@ import { NumberService } from './number.service';
   styleUrl: './app.component.css',
 })
 export class AppComponent {
-  #numberService = inject(NumberService);
   #destroyRef = inject(DestroyRef);
 
+  #numberService = inject(NumberService);
   error?: Error;
   numberUx$ = new Observable<number>();
-
   numberConsole$ = new Observable<number>();
+
+  #wrappedNumberService = inject(WrappedNumberService);
+  wrappedNumberUx$ = this.#wrappedNumberService.watchNumber$().pipe(takeUntilDestroyed());
 
   constructor() {
     this.#resetUxSubscription();

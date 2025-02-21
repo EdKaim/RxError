@@ -1,7 +1,20 @@
+<h1>Unwrapped</h1>
 @if (numberUx$ | async; as number) {
 <div>{{ number }}</div>
 } @else if (error) {
 <div>{{ error }}</div>
 } @else {
+<div>Loading...</div>
+}
+
+<h1>Wrapped</h1>
+@if (wrappedNumberUx$ | async; as response) { @if (response.success) { @if
+(response.result; as result) {
+<div>{{ result }}</div>
+} @else {
+<div>Response was undefined</div>
+} } @else {
+<div>{{ response.error }}</div>
+} } @else {
 <div>Loading...</div>
 }
