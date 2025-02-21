@@ -1,9 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, Observable, of, throwError } from 'rxjs';
 import { NumberService } from './number.service';
-import { WrappedNumberService } from './wrapped-number.service';
 
 @Component({
   selector: 'app-root',
@@ -12,50 +10,16 @@ import { WrappedNumberService } from './wrapped-number.service';
   styleUrl: './app.component.css',
 })
 export class AppComponent {
-  #destroyRef = inject(DestroyRef);
-
   #numberService = inject(NumberService);
-  error?: Error;
-  numberUx$ = new Observable<number>();
-  numberConsole$ = new Observable<number>();
+  numberUx$ = this.#numberService.watchNumber$();
+  numberSquaredUx$ = this.#numberService.watchSquared$();
+  numberHalvedSquareUx$ = this.#numberService.watchHalvedSquare$();
 
-  #wrappedNumberService = inject(WrappedNumberService);
-  wrappedNumberUx$ = this.#wrappedNumberService.watchNumber$().pipe(takeUntilDestroyed());
-
-  constructor() {
-    this.#resetUxSubscription();
-    this.#resetConsoleSubscription();
-  }
-
-  #resetUxSubscription() {
-    this.numberUx$ = this.#numberService.watchNumber$().pipe(
-      catchError((error) => {
-        this.error = error;
-        this.#resetUxSubscription();
-
-        // Using throwError here is probably the "correct" thing to do. However, this observable isn't this.numberUx$ anymore
-        // since it was swapped out in this.#resetUxSubscription(). Rethrowing the error will result in an ugly dump to the console
-        // because nobody is handling it anymore. To avoid this, you can return a value instead. This will keep the async pipe
-        // happy for the split second between swapping out this observable for the new one.
-        return throwError(() => error);
-        //return of(-1);
-      }),
-      takeUntilDestroyed(this.#destroyRef)
-    );
-  }
-
-  #resetConsoleSubscription() {
-    this.numberConsole$ = this.#numberService.watchNumber$().pipe(
-      catchError((error) => {
-        this.#resetConsoleSubscription();
-        return throwError(() => error);
-      }),
-      takeUntilDestroyed(this.#destroyRef)
-    );
-
-    this.numberConsole$.subscribe({
+  numberConsole$ = this.#numberService
+    .watchNumber$()
+    .pipe(takeUntilDestroyed())
+    .subscribe({
       next: (number) => console.log(number),
       error: (error) => console.log(error.message),
     });
-  }
 }
