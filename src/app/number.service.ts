@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { interval, map, ReplaySubject } from 'rxjs';
+import { interval, map, Observable, ReplaySubject } from 'rxjs';
 import { ApiResponse } from './api-response';
 
 @Injectable({
@@ -76,11 +76,14 @@ export class NumberService {
     );
   }
 
-  watchHalvedSquare$() {
+  watchHalvedSquareAsString$(): Observable<ApiResponse<string>> {
     return this.watchSquared$().pipe(
       map((response) => {
-        // Once again, we have to check for success and pass it along if not.
-        if (!response.success) return response;
+        // Once again, we have to check for success and pass it along if not. But since this technically
+        // returns a different type we need to recast the object before we "rethrow" it. Alternatively we
+        // could create a new object with the same properties and values but that's unnecessary overhead
+        // since response.result is undefined either way.
+        if (!response.success) return response as any as ApiResponse<string>;
 
         // We could potentially cut this check out since we know watchSquared$() will set success to
         // false if the number is null or undefined. But some people like to keep things like this
@@ -104,7 +107,7 @@ export class NumberService {
 
         return {
           success: true,
-          result: response.result / 2,
+          result: (response.result / 2).toString(),
         };
       })
     );
