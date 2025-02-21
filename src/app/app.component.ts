@@ -44,7 +44,6 @@ export class AppComponent {
   #resetConsoleSubscription() {
     this.numberConsole$ = this.#numberService.watchNumber$().pipe(
       catchError((error) => {
-        this.error = error;
         this.#resetConsoleSubscription();
         return throwError(() => error);
       }),
