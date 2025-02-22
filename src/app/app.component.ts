@@ -20,6 +20,7 @@ export class AppComponent {
     .pipe(takeUntilDestroyed())
     .subscribe({
       next: (number) => console.log(number),
-      error: (error) => console.log(error.message),
+      // No need to handle error here because error() is never used upstream.
+      // Anything that could be an error would be routed via wrapped object to next().
     });
 }
